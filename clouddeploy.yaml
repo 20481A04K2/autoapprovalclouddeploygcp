@@ -13,12 +13,14 @@ serialPipeline:
           verify: false
           promoteAutomation: true
     - targetId: qa
-      profiles: [qa]strategy:
+      profiles: [qa]
+      strategy:
         standard:
           verify: true
           promoteAutomation: true
     - targetId: prod
-      profiles: [prod]strategy:
+      profiles: [prod]
+      strategy:
         standard:
           verify: true
           promoteAutomation: false
