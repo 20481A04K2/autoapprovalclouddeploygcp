@@ -1,3 +1,6 @@
+# ==============================
+# Delivery Pipeline with Canary
+# ==============================
 apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
@@ -16,9 +19,44 @@ serialPipeline:
           runtimeConfig:
             cloudRun:
               automaticTrafficControl: true
-          canaryDeployment:
-            percentages: [10,50,100]
-            verify: false
+          customCanaryDeployment:
+            phaseConfigs:
+              - phaseId: "warmup-cr"
+                percentage: 10
+                profiles: ["prod"]
+                verify: false
+              - phaseId: "scaling-cr"
+                percentage: 50
+                profiles: ["prod"]
+                verify: false
+              - phaseId: "stable"
+                percentage: 100
+                profiles: ["prod"]
+                verify: false
+
+# ==============================
+# Automation for auto advancing phases
+# ==============================
+---
+apiVersion: deploy.cloud.google.com/v1
+kind: Automation
+metadata:
+  name: cloudrun-app-pipeline/auto-advance-canary
+description: Automatically advances canary rollout phases
+suspended: false
+serviceAccount: 326372984052-compute@developer.gserviceaccount.com
+selector:
+  targets:
+    - id: prod
+rules:
+  - advanceRolloutRule:
+      name: auto-advance-canary
+      sourcePhases: ["warmup-cr", "scaling-cr"]
+      wait: 1m
+
+# ==============================
+# Targets
+# ==============================
 ---
 apiVersion: deploy.cloud.google.com/v1
 kind: Target
@@ -43,19 +81,3 @@ metadata:
 description: Cloud Run prod environment
 run:
   location: projects/clear-booking-470907-q6/locations/asia-south1
----
-apiVersion: deploy.cloud.google.com/v1
-kind: Automation
-metadata:
-  name: cloudrun-app-pipeline/auto-advance-canary
-description: Automatically advance canary rollout from 10% → 50% → 100%
-suspended: false
-serviceAccount: 326372984052-compute@developer.gserviceaccount.com
-selector:
-  targets:
-    - id: prod
-rules:
-  - advanceRolloutRule:
-      name: auto-advance-canary
-      sourcePhases: ["10%", "50%"]   # Names of your phases (phase names are labels in canaryDeployment)
-      wait: 1m                      # Wait 1 minute after phase completes
