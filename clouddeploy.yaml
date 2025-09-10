@@ -11,16 +11,19 @@ serialPipeline:
       strategy:
         standard:
           verify: false
+          promoteAutomatically: true
     - targetId: qa
       profiles: [qa]
       strategy:
         standard:
-          verify: true
+          verify: false
+          promoteAutomatically: true
     - targetId: prod
       profiles: [prod]
       strategy:
         standard:
-          verify: true
+          verify: false
+          promoteAutomatically: true
           # This one will require manual approval
           # Add requireApproval: true below if you want approvals
 ---
