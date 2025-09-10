@@ -2,8 +2,7 @@ apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: cloudrun-app-pipeline
-description: Cloud Run pipeline with automation
-
+description: Cloud Run pipeline with automated time-based promotion
 serialPipeline:
   stages:
     - targetId: dev
@@ -40,31 +39,31 @@ run:
 apiVersion: deploy.cloud.google.com/v1
 kind: Automation
 metadata:
-  name: cloudrun-app-pipeline/promote-dev-to-qa
-description: Auto promote from dev → qa
+  name: cloudrun-app-pipeline/timed-promote-dev-to-qa
+description: Timed auto promotion from dev → qa every 2 minutes
 suspended: false
 serviceAccount: 326372984052-compute@developer.gserviceaccount.com
 selector:
   targets:
   - id: dev
 rules:
-- promoteReleaseRule:
-    name: auto-promote-to-qa
-    wait: 1m
+- timedPromoteReleaseRule:
+    name: auto-timed-promote-to-qa
     toTargetId: qa
+    schedule: "*/2 * * * *"   # every 2 minutes
 ---
 apiVersion: deploy.cloud.google.com/v1
 kind: Automation
 metadata:
-  name: cloudrun-app-pipeline/promote-qa-to-prod
-description: Auto promote from qa → prod
+  name: cloudrun-app-pipeline/timed-promote-qa-to-prod
+description: Timed auto promotion from qa → prod every 2 minutes
 suspended: false
 serviceAccount: 326372984052-compute@developer.gserviceaccount.com
 selector:
   targets:
   - id: qa
 rules:
-- promoteReleaseRule:
-    name: auto-promote-to-prod
-    wait: 1m
+- timedPromoteReleaseRule:
+    name: auto-timed-promote-to-prod
     toTargetId: prod
+    schedule: "*/2 * * * *"   # every 2 minutes
