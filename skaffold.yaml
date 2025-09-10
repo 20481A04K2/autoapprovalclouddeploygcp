@@ -1,0 +1,33 @@
+apiVersion: skaffold/v3alpha1
+kind: Config
+metadata:
+  name: cloud-run-app
+
+build:
+  artifacts:
+  - image: asia-south1-docker.pkg.dev/mythic-beanbag-463309-e9/deploy-to-cloudrun/cloudrun-app
+
+profiles:
+- name: dev
+  manifests:
+    rawYaml:
+    - deploy-dev.yaml
+  deploy:
+    cloudrun:
+      region: asia-south1
+
+- name: qa
+  manifests:
+    rawYaml:
+    - deploy-qa.yaml
+  deploy:
+    cloudrun:
+      region: asia-south1
+
+- name: prod
+  manifests:
+    rawYaml:
+    - deploy-prod.yaml
+  deploy:
+    cloudrun:
+      region: asia-south1
