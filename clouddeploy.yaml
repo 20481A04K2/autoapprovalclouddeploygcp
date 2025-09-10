@@ -2,7 +2,7 @@ apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: cloudrun-app-pipeline
-description: Cloud Run pipeline with canary deployment on prod
+description: Cloud Run pipeline with fully automated canary deployment on prod
 serialPipeline:
   stages:
     - targetId: dev
@@ -16,21 +16,9 @@ serialPipeline:
           runtimeConfig:
             cloudRun:
               automaticTrafficControl: true
-          automatedRollout: true    
-          customCanaryDeployment:
-            phaseConfigs:
-              - phaseId: "warmup-cr"
-                percentage: 10
-                profiles: ["prod"]
-                verify: false
-              - phaseId: "scaling-cr"
-                percentage: 50
-                profiles: ["prod"]
-                verify: false
-              - phaseId: "stable"
-                percentage: 100
-                profiles: ["prod"]
-                verify: false
+          canaryDeployment:
+            percentages: [10,50,100]
+            verify: false
 ---
 apiVersion: deploy.cloud.google.com/v1
 kind: Target
