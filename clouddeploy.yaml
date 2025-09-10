@@ -1,11 +1,11 @@
 # ==============================
-# Delivery Pipeline with Canary
+# Delivery Pipeline
 # ==============================
 apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: cloudrun-app-pipeline
-description: Cloud Run pipeline with fully automated canary deployment on prod
+description: Cloud Run pipeline with repair/failover automation
 serialPipeline:
   stages:
     - targetId: dev
@@ -14,45 +14,31 @@ serialPipeline:
       profiles: [qa]
     - targetId: prod
       profiles: [prod]
-      strategy:
-        canary:
-          runtimeConfig:
-            cloudRun:
-              automaticTrafficControl: true
-          customCanaryDeployment:
-            phaseConfigs:
-              - phaseId: "warmup-cr"
-                percentage: 10
-                profiles: ["prod"]
-                verify: false
-              - phaseId: "scaling-cr"
-                percentage: 50
-                profiles: ["prod"]
-                verify: false
-              - phaseId: "stable"
-                percentage: 100
-                profiles: ["prod"]
-                verify: false
 
 # ==============================
-# Automation for auto advancing phases
+# Automation for repair/failover
 # ==============================
 ---
 apiVersion: deploy.cloud.google.com/v1
 kind: Automation
 metadata:
-  name: cloudrun-app-pipeline/auto-advance-canary
-description: Automatically advances canary rollout phases
+  name: cloudrun-app-pipeline/repair-rollout
+description: Automatically retries failed rollouts and rolls back if retries fail
 suspended: false
 serviceAccount: 326372984052-compute@developer.gserviceaccount.com
 selector:
   targets:
     - id: prod
 rules:
-  - advanceRolloutRule:
-      name: auto-advance-canary
-      sourcePhases: ["warmup-cr", "scaling-cr"]
-      wait: 1m
+  - repairRolloutRule:
+      name: repair-rollout
+      repairPhases:
+        - retry:
+            attempts: 3
+            wait: 1m
+            backoffMode: LINEAR
+        - rollback:
+            destinationPhase: "stable"
 
 # ==============================
 # Targets
