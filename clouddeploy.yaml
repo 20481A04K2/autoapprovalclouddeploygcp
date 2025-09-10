@@ -11,19 +11,18 @@ serialPipeline:
       strategy:
         standard:
           verify: false
-          promoteAutomation: true
     - targetId: qa
       profiles: [qa]
       strategy:
         standard:
           verify: true
-          promoteAutomation: true
     - targetId: prod
       profiles: [prod]
       strategy:
         standard:
           verify: true
-          promoteAutomation: false
+          # This one will require manual approval
+          # Add requireApproval: true below if you want approvals
 ---
 apiVersion: deploy.cloud.google.com/v1
 kind: Target
