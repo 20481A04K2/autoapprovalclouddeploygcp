@@ -49,8 +49,9 @@ selector:
 rules:
 - timedPromoteReleaseRule:
     name: auto-timed-promote-to-qa
-    toTargetId: qa
     schedule: "*/2 * * * *"   # every 2 minutes
+    timeZone: "Asia/Kolkata"
+    destinationTargetId: qa
 ---
 apiVersion: deploy.cloud.google.com/v1
 kind: Automation
@@ -65,5 +66,6 @@ selector:
 rules:
 - timedPromoteReleaseRule:
     name: auto-timed-promote-to-prod
-    toTargetId: prod
     schedule: "*/2 * * * *"   # every 2 minutes
+    timeZone: "Asia/Kolkata"
+    destinationTargetId: prod
