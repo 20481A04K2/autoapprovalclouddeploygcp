@@ -2,7 +2,7 @@ apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: cloudrun-app-pipeline
-description: Cloud Run pipeline with automated time-based promotion
+description: Cloud Run pipeline with canary deployment on prod
 serialPipeline:
   stages:
     - targetId: dev
@@ -11,6 +11,25 @@ serialPipeline:
       profiles: [qa]
     - targetId: prod
       profiles: [prod]
+      strategy:
+        canary:
+          runtimeConfig:
+            cloudRun:
+              automaticTrafficControl: true
+          customCanaryDeployment:
+            phaseConfigs:
+              - phaseId: "warmup-cr"
+                percentage: 10
+                profiles: ["base-config"]
+                verify: true
+              - phaseId: "scaling-cr"
+                percentage: 50
+                profiles: ["base-config"]
+                verify: true
+              - phaseId: "stable"
+                percentage: 100
+                profiles: ["base-config"]
+                verify: true
 ---
 apiVersion: deploy.cloud.google.com/v1
 kind: Target
@@ -35,37 +54,3 @@ metadata:
 description: Cloud Run prod environment
 run:
   location: projects/clear-booking-470907-q6/locations/asia-south1
----
-apiVersion: deploy.cloud.google.com/v1
-kind: Automation
-metadata:
-  name: cloudrun-app-pipeline/timed-promote-dev-to-qa
-description: Timed auto promotion from dev → qa every 2 minutes
-suspended: false
-serviceAccount: 326372984052-compute@developer.gserviceaccount.com
-selector:
-  targets:
-  - id: dev
-rules:
-- timedPromoteReleaseRule:
-    name: auto-timed-promote-to-qa
-    schedule: "*/2 * * * *"   # every 2 minutes
-    timeZone: "Asia/Kolkata"
-    destinationTargetId: qa
----
-apiVersion: deploy.cloud.google.com/v1
-kind: Automation
-metadata:
-  name: cloudrun-app-pipeline/timed-promote-qa-to-prod
-description: Timed auto promotion from qa → prod every 2 minutes
-suspended: false
-serviceAccount: 326372984052-compute@developer.gserviceaccount.com
-selector:
-  targets:
-  - id: qa
-rules:
-- timedPromoteReleaseRule:
-    name: auto-timed-promote-to-prod
-    schedule: "*/2 * * * *"   # every 2 minutes
-    timeZone: "Asia/Kolkata"
-    destinationTargetId: prod
