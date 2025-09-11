@@ -6,7 +6,7 @@ spec:
   template:
     spec:
       containers:
-      - image: app1
+      - image: app
         resources:
           limits:
             cpu: 1000m
