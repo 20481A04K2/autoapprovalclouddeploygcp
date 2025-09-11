@@ -25,7 +25,7 @@ metadata:
   name: cloudrun-app-pipeline1/repair-rollout
 description: Automatically retries failed rollouts and rolls back if retries fail
 suspended: false
-serviceAccount: 326372984052-compute@developer.gserviceaccount.com
+serviceAccount: 764196271662-compute@developer.gserviceaccount.com
 selector:
   targets:
     - id: prod
