@@ -16,7 +16,7 @@ serialPipeline:
       profiles: [prod]
 
 # ==============================
-# Automation for repair/failover
+# Automation for repair/failover (prod)
 # ==============================
 ---
 apiVersion: deploy.cloud.google.com/v1
@@ -38,7 +38,47 @@ rules:
             wait: 1m
             backoffMode: LINEAR
         - rollback:
-            destinationPhase: "stable"
+            destinationPhase: "prod"
+
+# ==============================
+# Auto Promotion from dev → qa
+# ==============================
+---
+apiVersion: deploy.cloud.google.com/v1
+kind: Automation
+metadata:
+  name: cloudrun-app-pipeline1/promote-dev-to-qa
+description: Auto promote from dev → qa after 1m wait
+suspended: false
+serviceAccount: 764196271662-compute@developer.gserviceaccount.com
+selector:
+  targets:
+    - id: dev
+rules:
+  - promoteReleaseRule:
+      name: auto-promote-to-qa
+      wait: 1m
+      toTargetId: qa
+
+# ==============================
+# Auto Promotion from qa → prod
+# ==============================
+---
+apiVersion: deploy.cloud.google.com/v1
+kind: Automation
+metadata:
+  name: cloudrun-app-pipeline1/promote-qa-to-prod
+description: Auto promote from qa → prod after 1m wait
+suspended: false
+serviceAccount: 764196271662-compute@developer.gserviceaccount.com
+selector:
+  targets:
+    - id: qa
+rules:
+  - promoteReleaseRule:
+      name: auto-promote-to-prod
+      wait: 1m
+      toTargetId: prod
 
 # ==============================
 # Targets
