@@ -40,7 +40,7 @@ steps:
   args:
     [
       "deploy", "releases", "create", "${_BUILD_ID}",
-      "--delivery-pipeline", "cloudrun-app-pipeline",
+      "--delivery-pipeline", "cloudrun-app-pipeline1",
       "--region", "asia-south1",
       "--images", "app=asia-south1-docker.pkg.dev/divine-course-470809-f6/deploy-to-cloudrun/cloudrun-app:${_BUILD_ID}",
       "--project=divine-course-470809-f6"
