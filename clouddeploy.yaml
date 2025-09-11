@@ -4,7 +4,7 @@
 apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
-  name: cloudrun-app-pipeline
+  name: cloudrun-app-pipeline1
 description: Cloud Run pipeline with repair/failover automation
 serialPipeline:
   stages:
@@ -22,7 +22,7 @@ serialPipeline:
 apiVersion: deploy.cloud.google.com/v1
 kind: Automation
 metadata:
-  name: cloudrun-app-pipeline/repair-rollout
+  name: cloudrun-app-pipeline1/repair-rollout
 description: Automatically retries failed rollouts and rolls back if retries fail
 suspended: false
 serviceAccount: 326372984052-compute@developer.gserviceaccount.com
