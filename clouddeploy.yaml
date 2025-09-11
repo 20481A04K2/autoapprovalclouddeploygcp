@@ -5,7 +5,7 @@ apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: cloudrun-app-pipeline
-description: Cloud Run pipeline with automatic repair + rollback
+description: Cloud Run pipeline with repair/failover automation
 serialPipeline:
   stages:
     - targetId: dev
@@ -14,12 +14,6 @@ serialPipeline:
       profiles: [qa]
     - targetId: prod
       profiles: [prod]
-      # ✅ Add rollback policy for prod stage itself
-      strategy:
-        standard:
-          failurePolicy:
-            retry: true       # Will retry deployment automatically
-            rollback: true    # Will rollback to previous successful release if retries fail
 
 # ==============================
 # Automation for repair/failover
@@ -40,13 +34,11 @@ rules:
       name: repair-rollout
       repairPhases:
         - retry:
-            attempts: 3           # 3 retry attempts
-            wait: 1m              # Wait 1 minute between attempts
-            backoffMode: LINEAR   # Linear backoff (1m, 2m, 3m)
+            attempts: 3
+            wait: 1m
+            backoffMode: LINEAR
         - rollback:
-            # ✅ No need to specify destinationPhase for standard strategy rollback,
-            # it will redeploy the last good release
-            destinationPhase: ""  # Empty = rollback entire release
+            destinationPhase: "stable"
 
 # ==============================
 # Targets
